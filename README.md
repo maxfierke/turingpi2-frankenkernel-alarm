@@ -1,6 +1,6 @@
 # UNDERCONSTRUCTION, PROBABLY NOT WORKING YET
 
-# Arch Linux ARM for the Turing Pi 2 w/ NVIDIA Jetson Nano, TX2 NX, and Pine64 Soquartz
+# Arch Linux ARM for Turing Pi 2 SoCs
 
 Maintainer: Max Fierke
 
@@ -10,9 +10,14 @@ License: LGPL-2.1
 
 # Introduction
 
-This document will walk you through installing [Arch Linux ARM](https://archlinuxarm.org/) on the DevTerm A06.
+This document will walk you through installing [Arch Linux ARM](https://archlinuxarm.org/) on a few of the supported SoCs for the Turing Pi 2 cluster board.
 
-We will create a root file system based on the **soquartz** architecture (rk3328) and **NVIDIA Jetson TX2 NX, Jetson Nano** (tegra186, tegra210)
+We will create a root file system for supporting three different SoCs:
+  * **soquartz** (rk3566)
+  * **NVIDIA Jetson TX2 NX** (tegra186)
+  * **NVIDIA Jetson Nano** (tegra210)
+
+I may expand the supported SoCs if/when I acquire them. (e.g. I suspect I'll get a Turing RK1 at some point)
 
 ## Caution
 If you are running advanced filesystems on your host (for example `zfs`), don’t try to prepare the image on that host. 
@@ -21,7 +26,7 @@ If you are running advanced filesystems on your host (for example `zfs`), don’
 ## Quickstart
 
 Pre-built root filesystem(s) are provided in the **Releases** tab. Skip to the **Prepare the SD Card** section if using
-a pre-built image, for **soquartz**, or **Prepare to Flash** if using eMMC on NVIDIA Jetson.
+a pre-built image for **soquartz**, or **Prepare to Flash** if using a pre-built image for eMMC on **NVIDIA Jetson**.
 
 **NOTE:** Please note the following defaults for the release filesystem:
 
@@ -215,8 +220,11 @@ $ cd
 
 ## Compiling The Packages
 
-This repository contains pre-configured and patched Arch Linux packages for the relevant SoCs. The Linux kernel and U-Boot
-are based off the **rock64** variants, already available in Arch Linux ARM, with patches provided from various sources for each SoC.
+This repository contains pre-configured and patched Arch Linux packages for
+the relevant SoCs. The Linux kernel and U-Boots are based off the multi-platform
+AArch64 kernel from Manjaro ARM, which is based on the kernel already available
+in Arch Linux ARM, with patches provided from various sources for relevant SoCs
+and additional configuration for Tegra devices.
 
 ### Download This Repository
 
@@ -234,22 +242,14 @@ $ cd turingpi2-frankenkernel-alarm
    `MAKEFLAGS="-j$(nproc)"` to the `makepkg` command to instruct the compiler to use one worker for each core.
 
 ```
-$ cd linux-turingpi2-frankenkernel
+$ cd linux-turingpi2
 $ MAKEFLAGS="-j$(nproc)" makepkg -si 
 $ cd ..
 ```
 
 ### Compiling U-Boot
 
-1. Build the rkbin helper, which allows us to run rockchip-supplied, x64-only, image packing tool for uboot.
-
-```
-$ cd rkbin-aarch64-hack
-$ MAKEFLAGS="-j$(nproc)" makepkg -si 
-$ cd ..
-```
-
-2. Build each u-boot package, similar to above.
+1. Build each u-boot package, similar to above.
 
 ```
 $ cd uboot-soquartz # Or uboot-jetson-nano, uboot-jetson-tx2-nx
@@ -265,14 +265,14 @@ prepare the SD card / flash the eMMC (depending on the chip).
 Original:
 ```
 LABEL Arch ARM
-KERNEL /boot/Image
+KERNEL /boot/Image # We're changing this one
 FDT /dtbs/rockchip/rk3566-soquartz-cm4.dtb
 APPEND initrd=/boot/initramfs-linux.img console=ttyS2,1500000 root=LABEL=ROOT_ARCH rw rootwait audit=0
 ```
 Updated:
 ```
 LABEL Arch ARM
-KERNEL /Image
+KERNEL /Image # Changed this line
 FDT /dtbs/rockchip/rk3566-soquartz-cm4.dtb
 APPEND initrd=/initramfs-linux.img console=ttyS2,1500000 root=LABEL=ROOT_ARCH rw rootwait audit=0
 ```
@@ -437,4 +437,3 @@ via UART:
 # Acknowledgements
 
 I stole this README format from Cole Smith and Yatao Li's guide on running Arch Linux ARM on the ClockworkPi A06
-
