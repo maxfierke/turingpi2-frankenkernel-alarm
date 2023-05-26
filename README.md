@@ -4,7 +4,7 @@
 
 Maintainer: Max Fierke
 
-README based on from: Cole Smith & Yatao Li's ["Arch Linux ARM for ClockworkPi A06"]()
+README based on from: Cole Smith & Yatao Li's ["Arch Linux ARM for ClockworkPi A06"](https://github.com/yatli/arch-linux-arm-clockworkpi-a06/tree/main)
 
 License: LGPL-2.1
 
