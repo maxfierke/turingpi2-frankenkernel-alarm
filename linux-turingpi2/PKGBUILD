@@ -27,7 +27,7 @@ source=("http://www.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.xz"
 md5sums=('646d9e1f4f62d01f53dc2fd6b4ea9005'
          'a829e0d4711d8feff5fee1973938b25a'
          '080d29aed29a49fe3ef7953e816ea4f4'
-         'fcc2f029da4fb228d79548430151f797'
+         '13253419c6490f7fbf7e7fc591c30025'
          '86d4a35722b5410e3b29fc92dae15d4b'
          'ce6c81ad1ad1f8b333fd6077d47abdaf'
          '3dc88030a8f2f5a5f97266d99b149f77')
