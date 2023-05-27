@@ -335,7 +335,7 @@ Change ownership of the tarball and exit the `root` account
 
 **You now have a root filesystem tarball to bootstrap the SD card!**
 
-## Prepare the SD Card
+## Prepare the SD Card (for soquartz)
 
 We will now put our prepared filesystem onto the SD card. We will follow
 [Arch Linux ARM's guide for the rock64](https://archlinuxarm.org/platforms/armv8/rockchip/rock64) (except that we use f2fs for root, instead of ext4),
@@ -436,4 +436,8 @@ via UART:
 
 # Acknowledgements
 
-I stole this README format from Cole Smith and Yatao Li's guide on running Arch Linux ARM on the ClockworkPi A06
+I stole this README format from Cole Smith and Yatao Li's guide on running
+Arch Linux ARM on the ClockworkPi A06.
+
+The Linux and PKGBUILD is based on the Manjaro ARM kernel PKGBUILD from the
+Manjaro ARM team (Dan Johansen, Furkan Salman Kardame, and others)

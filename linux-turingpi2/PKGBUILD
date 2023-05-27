@@ -19,8 +19,6 @@ makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
 source=("http://www.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.xz"
         '3001-irqchip-gic-v3-add-hackaround-for-rk3568-its.patch'
-        '3002-arm64-dts-rockchip-Lower-sd-speed-on-soquartz.patch'
-        '3003-arm64-dts-rockchip-Add-hdmi-cec-assigned-clocks-to-r.patch'
         '3004-arm64-dts-rockchip-rk356x-update-pcie-io-ranges.patch'               # From https://github.com/neggles/linux-quartz64/commit/2c1e3811e6d7430f7d46dbb01d3773192c51cdcf (by Neggles)
         'config'
         'linux.preset'
@@ -68,9 +66,6 @@ prepare() {
 
   # Assorted Manjaro ARM patches
   apply_patches 1
-
-  # Assorted Pinebook, PinePhone and PineTab patches
-  apply_patches 2
 
   # Assorted rk356x patches
   apply_patches 3
