@@ -399,9 +399,8 @@ Running `fsck -y /dev/sdX1` on an external system can fix this issue.
 
 ```
 # cd /mnt/boot
-# dd if=idbloader.img of=/dev/sdX seek=64 conv=notrunc,fsync
-# dd if=uboot.img of=/dev/sdX seek=16384 conv=notrunc,fsync
-# dd if=trust.img of=/dev/sdX seek=24576 conv=notrunc,fsync
+# dd if=idbloader.img of=/dev/sdX seek=64 conv=notrunc,fsync"
+# dd if=u-boot.itb of=/dev/sdX seek=16384 conv=notrunc,fsync"
 ```
 
 8. Unmount and eject the SD card
@@ -441,3 +440,6 @@ Arch Linux ARM on the ClockworkPi A06.
 
 The Linux and PKGBUILD is based on the Manjaro ARM kernel PKGBUILD from the
 Manjaro ARM team (Dan Johansen, Furkan Salman Kardame, and others)
+
+uboot-soquartz-cm4 is basically the same as the Manjaro ARM version from
+Dan Johansen w/ Arch instead of Manjaro specified.
