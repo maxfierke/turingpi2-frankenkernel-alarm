@@ -12,8 +12,9 @@ License: LGPL-2.1
 
 This document will walk you through installing [Arch Linux ARM](https://archlinuxarm.org/) on a few of the supported SoCs for the Turing Pi 2 cluster board.
 
-We will create a root file system for supporting three different SoCs:
-  * **soquartz** (rk3566)
+We will create a root file system for supporting ~~three~~ two different SoCs:
+  * ~~**soquartz** (rk3566)~~
+    * Just use Manjaro, it's easier: https://github.com/manjaro-arm/soquartz-cm4-images/releases
   * **NVIDIA Jetson TX2 NX** (tegra186)
   * **NVIDIA Jetson Nano** (tegra210)
 
@@ -25,8 +26,8 @@ If you are running advanced filesystems on your host (for example `zfs`), don’
 
 ## Quickstart
 
-Pre-built root filesystem(s) are provided in the **Releases** tab. Skip to the **Prepare the SD Card** section if using
-a pre-built image for **soquartz**, or **Prepare to Flash** if using a pre-built image for eMMC on **NVIDIA Jetson**.
+Pre-built root filesystem(s) are provided in the **Releases** tab. Skip to the
+**Prepare to Flash** if using a pre-built image for eMMC on **NVIDIA Jetson**.
 
 **NOTE:** Please note the following defaults for the release filesystem:
 
@@ -252,29 +253,9 @@ $ cd ..
 1. Build each u-boot package, similar to above.
 
 ```
-$ cd uboot-soquartz # Or uboot-jetson-nano, uboot-jetson-tx2-nx
+$ cd uboot-jetson-nano # or uboot-jetson-tx2-nx
 $ MAKEFLAGS="-j$(nproc)" makepkg -si 
 $ cd ..
-```
-
-**NOTE: DO NOT INSTALL THE BOOTLOADER TO THE DISK WHEN ASKED AFTER THIS STEP.** We will do this ourselves when we
-prepare the SD card / flash the eMMC (depending on the chip).
-
-
-**Note:** Since we are going to use a separate boot partition, edit the file `/boot/extlinux/extlinux.conf`.
-Original:
-```
-LABEL Arch ARM
-KERNEL /boot/Image # We're changing this one
-FDT /dtbs/rockchip/rk3566-soquartz-cm4.dtb
-APPEND initrd=/boot/initramfs-linux.img console=ttyS2,1500000 root=LABEL=ROOT_ARCH rw rootwait audit=0
-```
-Updated:
-```
-LABEL Arch ARM
-KERNEL /Image # Changed this line
-FDT /dtbs/rockchip/rk3566-soquartz-cm4.dtb
-APPEND initrd=/initramfs-linux.img console=ttyS2,1500000 root=LABEL=ROOT_ARCH rw rootwait audit=0
 ```
 
 ### Compiling Additional Packages
@@ -291,7 +272,7 @@ $ cd ..
 ```
 # pacman -Rs base-devel git vim wget ranger xmlto docbook-xsl inetutils bc dtc
 # rm /var/cache/pacman/pkg/*.pkg.tar.xz*
-# rm /home/alarm/gcc*
+# rm -rf /home/alarm/gcc* /home/alarm/.cache/ /home/alarm/.bash_history
 ```
 
 ### Exit the chroot
@@ -335,86 +316,9 @@ Change ownership of the tarball and exit the `root` account
 
 **You now have a root filesystem tarball to bootstrap the SD card!**
 
-## Prepare the SD Card (for soquartz)
+## Prepare to Flash
 
-We will now put our prepared filesystem onto the SD card. We will follow
-[Arch Linux ARM's guide for the rock64](https://archlinuxarm.org/platforms/armv8/rockchip/rock64) (except that we use f2fs for root, instead of ext4),
-but use our tarball in place of theirs.
-
-1. Zero the beginning of the SD card
-
-```
-# dd if=/dev/zero of=/dev/sdX bs=1M count=32
-```
-
-2. Start fdisk to partition the SD card
-
-```
-# fdisk /dev/sdX
-```
-
-3. Inside fdisk,
-
-    1. Type **o**. This will clear out any partitions on the drive
-    2. Type **p** to list partitions. There should be no partitions left
-    3. Type **n**, then **p** for primary, **1** for the first partition on the drive, **32768** for the first sector, then **+2G** for the last sector (boot partition, 2GB)
-	4. Type **p** and note the end sector number for the partition freshly created.
-    5. Type **n**, then **p**, **2** for the second partition, **use number from step 4 and add 2** as first sector, then **+4G** for the last sector (swap partition, 4GB)
-	6. Again, type **p** and note the end sector number for the partition freshly created.
-    7. Type **n**, then **p**, **3** for the third partition, **use number from step 6 and add 2** as first sector, then leave default for the last sector (root partition, takes all available space)
-    8. Write the partition table and exit by typing **w**
-
-4. Create the **ext4** filesystem **without a Journal** for boot, and **f2fs** filesystem for root
-
-```
-# mkfs.ext4 -L BOOT_ARCH -O ^has_journal /dev/sdX1
-# mkswap /dev/sdX2
-# mkfs.f2fs -l ROOT_ARCH -O extra_attr,inode_checksum,sb_checksum /dev/sdX3
-```
-
-**IMPORTANT** The `mkswap` command will return the swap partition's UUID, which will be needed later. Please write it down.
-
-**NOTE:** Disabling the journal is helpful for simple flash devices like SD Cards to reduce successive writes.
-In rare cases, your filesystem may become corrupted, which may arise as a boot loop.
-Running `fsck -y /dev/sdX1` on an external system can fix this issue.
-
-5. Mount the filesystem
-
-```
-# mount /dev/sdX3 /mnt
-# mkdir -p /mnt/boot
-# mount /dev/sdX1 /mnt/boot
-```
-
-6. Install the root filesystem (as root not via sudo)
-
-```
-# sudo su
-# bsdtar -xpf turingpi2-frankenkernel-alarm-rootfs.tar.xz -C /mnt
-# echo 'UUID="<SWAP PARTITION UUID HERE>" none  swap  sw  0 0' >> /mnt/etc/fstab
-# exit
-```
-
-7. Install the bootloader to the SD card
-
-```
-# cd /mnt/boot
-# dd if=idbloader.img of=/dev/sdX seek=64 conv=notrunc,fsync"
-# dd if=u-boot.itb of=/dev/sdX seek=16384 conv=notrunc,fsync"
-```
-
-8. Unmount and eject the SD card
-
-```
-# cd
-# umount /mnt/boot
-# umount /mnt
-# sync
-```
-
-## Done!
-
-The SD card is now ready to be booted by the DevTerm! Good luck!
+TBD
 
 ## Next Steps
 
@@ -429,8 +333,8 @@ via UART:
 1. Connect a USB-to-serial cable on the UART header for the specific node on Turing Pi 2 board
   - Node 1 requires UART through the GPIO pins, see the Turing Pi 2 docs for more details
 3. Connect the other end to your Linux system, you should now see a new device: `/dev/ttyUSB0`
-4. Monitor the connection with `sudo stty -F /dev/ttyUSB0 1500000 && sudo cat /dev/ttyUSB0`
-  * The NVIDIA Jetsons use a lower baudrate: `115200`
+4. Monitor the connection with `sudo stty -F /dev/ttyUSB0 115200 && sudo cat /dev/ttyUSB0`
+  * Or use `picocom`, `sudo picocom -b 115200 /dev/ttyUSB0`
 6. Power on your Turing Pi 2 and/or the specific node and monitor for errors
 
 # Acknowledgements
@@ -440,6 +344,3 @@ Arch Linux ARM on the ClockworkPi A06.
 
 The Linux and PKGBUILD is based on the Manjaro ARM kernel PKGBUILD from the
 Manjaro ARM team (Dan Johansen, Furkan Salman Kardame, and others)
-
-uboot-soquartz-cm4 is basically the same as the Manjaro ARM version from
-Dan Johansen w/ Arch instead of Manjaro specified.
