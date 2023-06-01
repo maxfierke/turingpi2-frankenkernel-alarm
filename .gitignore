@@ -12,4 +12,5 @@
 pkg/
 src/
 
-rootfs/
+rootfs*/
+public_sources_*
