@@ -5,8 +5,8 @@
 # Contributor: Dragan Simic <dsimic@buserror.io>
 
 pkgbase=linux-turingpi2
-pkgver=6.3.2
-pkgrel=2
+pkgver=6.3.5
+pkgrel=1
 _newversion=false
 _stopbuild=false     # Will also stop if ${_newversion} is true
 _srcname="linux-${pkgver/%.0/}"
@@ -24,7 +24,7 @@ source=("http://www.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.xz"
         'linux.preset'
         '60-linux.hook'
         '90-linux.hook')
-md5sums=('646d9e1f4f62d01f53dc2fd6b4ea9005'
+md5sums=('9b517d394dc1446890b4b15bdf8afa9f'
          'a829e0d4711d8feff5fee1973938b25a'
          '080d29aed29a49fe3ef7953e816ea4f4'
          '80dbeb745ee986280e99ccc705cd5c42'
