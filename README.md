@@ -1,6 +1,6 @@
 # UNDERCONSTRUCTION, PROBABLY NOT WORKING YET
 
-# Arch Linux ARM for Turing Pi 2 SoCs
+# Manjaro ARM for Turing Pi 2 SoCs
 
 Maintainer: Max Fierke
 
@@ -10,11 +10,11 @@ License: LGPL-2.1
 
 # Introduction
 
-This document will walk you through installing [Arch Linux ARM](https://archlinuxarm.org/) on a few of the supported SoCs for the Turing Pi 2 cluster board.
+This document will walk you through installing [Manjaro ARM](https://archlinuxarm.org/) on a few of the supported SoCs for the Turing Pi 2 cluster board.
 
 We will create a root file system for supporting ~~three~~ two different SoCs:
   * ~~**soquartz** (rk3566)~~
-    * Just use Manjaro, it's easier: https://github.com/manjaro-arm/soquartz-cm4-images/releases
+    * Use the existing images: https://github.com/manjaro-arm/soquartz-cm4-images/releases
   * **NVIDIA Jetson TX2 NX** (tegra186)
   * **NVIDIA Jetson Nano** (tegra210)
 
@@ -67,40 +67,37 @@ $ yay -S base-devel qemu-user-static qemu-user-binfmt arch-install-scripts
 $ ls /proc/sys/fs/binfmt_misc
 ```
 
-3. Download the base root FS to use. We will use the `aarch64` tarball from Arch Linux ARM
+3. Download the base root FS to use. We will use the latest `aarch64` tarball from Manjaro ARM
+
+Find the latest here: https://github.com/manjaro-arm/rootfs/releases
+
+e.g.
 
 ```
-$ wget http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
+$ wget https://github.com/manjaro-arm/rootfs/releases/download/20230605/Manjaro-ARM-aarch64-latest.tar.gz
 ```
 
 4. Create the mount point and extract the files as root (not via sudo)
 
 ```
 $ sudo su
-# mkdir root 
+# mkdir rootfs
 
-# bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C root
-# mount --bind root root
+# bsdtar -xpf Manjaro-ARM-aarch64-latest.tar.gz -C rootfs
+# mount --bind rootfs rootfs
 ```
 
-**NOTE**: It's very important that this `root` folder is owned by **root**. Otherwise, you will
+**NOTE**: It's very important that this `rootfs` folder is owned by **root**. Otherwise, you will
 get `unsafe path transition`
 errors in the final build.
 
 5. Chroot into the newly created environment
 
 ```
-# arch-chroot root
+# arch-chroot rootfs
 ```
 
-6. Inside the chroot, populate and init the pacman keyring
-
-```
-# pacman-key --init
-# pacman-key --populate archlinuxarm
-```
-
-7. Finally, update the packages
+6. Finally, update the packages
 
 ```
 # pacman -Syu
@@ -112,7 +109,10 @@ We will start with lightly configuring our system before compiling the packages.
 
 For this section, **all commands will be run inside the chroot**.
 
-1. Install some useful tools
+**TODO**: This is all wrong, need to update for creating a "minimal" image from
+the Manjaro rootfs.
+
+1. Install the packages needed for a minimal base
 
 ```
 # pacman -S base-devel git vim wget ranger sudo man networkmanager
@@ -134,8 +134,8 @@ For this section, **all commands will be run inside the chroot**.
 5. Reference partitions in `/etc/fstab`
 
 ```
-# echo 'LABEL=ROOT_ARCH    /    f2fs    defaults,noatime    0    0' >> /etc/fstab
-# echo 'LABEL=BOOT_ARCH    /boot    ext4    defaults    0    0' >> /etc/fstab
+# echo 'LABEL=ROOT_MNJRO    /    f2fs    defaults,noatime    0    0' >> /etc/fstab
+# echo 'LABEL=BOOT_MNJRO    /boot    ext4    defaults    0    0' >> /etc/fstab
 ```
 
 6. Set the time using `timedatectl`. To list supported timezones: `timedatectl list-timezones`
@@ -167,29 +167,32 @@ your host system timezone after finishing the root tarball.
 # passwd
 ```
 
-### Switch to the `alarm` user
+### Switch to the `manjaro` user
 
-1. We can avoid working with the root account by granting `alarm`, the default Arch Linux ARM user, `sudo` privileges.
+**TODO**: This is all wrong, need to update for creating a "minimal" image from
+the Manjaro rootfs.
+
+1. We can avoid working with the root account by granting `manjaro`, the default Arch Linux ARM user, `sudo` privileges.
 
 ```
 # EDITOR=/usr/bin/vim visudo
 ```
 
-2. And add the corresponding line for `alarm` after the one for `root`
+2. And add the corresponding line for `manjaro` after the one for `root`
 
 ```
-alarm ALL=(ALL) ALL
+manjaro ALL=(ALL) ALL
 ```
 
-3. Switch to the `alarm` user
+3. Switch to the `manjaro` user
 
 ```
-# su alarm
+# su manjaro
 
 $ cd
 ```
 
-**NOTE**: The default password for the **alarm** user is **alarm**
+**NOTE**: The default password for the **manjaro** user is **manjaro**
 
 ## Acquiring GCC Build Tools
 
@@ -207,7 +210,7 @@ $ wget https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binr
 2. Extract the binaries to another directory
 
 ```
-$ mkdir gcc 
+$ mkdir gcc
 $ tar -xJf gcc-arm-10.3-2021.07-aarch64-arm-none-eabi.tar.xz -C gcc
 ```
 
@@ -224,60 +227,69 @@ $ cd
 This repository contains pre-configured and patched Arch Linux packages for
 the relevant SoCs. The Linux kernel and U-Boots are based off the multi-platform
 AArch64 kernel from Manjaro ARM, which is based on the kernel already available
-in Arch Linux ARM, with patches provided from various sources for relevant SoCs
-and additional configuration for Tegra devices.
+in Arch Linux ARM, with additional configuration for Tegra devices.
+
+Eventually, I hope to get these config changes into the default Manjaro ARM
+kernel, and then we just need to worry about packaging and flashing.
 
 ### Download This Repository
 
-1. Inside the `alarm` home folder of your `aarch64` chroot environment, clone this repository
+1. Inside the `manjaro` home folder of your `aarch64` chroot environment, clone this repository
 
 ```
-$ git clone https://github.com/maxfierke/turingpi2-frankenkernel-alarm.git
-$ cd turingpi2-frankenkernel-alarm
+$ git clone https://github.com/maxfierke/turingpi2-manjaro.git
+$ cd turingpi2-manjaro
 ```
 
 ### Compiling The Linux Kernel
 
-1. Build the package. **This can take a long time!!** Especially since we are emulating an `aarch64`
+1. Build the package. **This can take a long time!!** Especially if we are emulating an `aarch64`
    architecture. The package build tool `makepkg`, supports a flag called `MAKEFLAGS`. Below, we will append
    `MAKEFLAGS="-j$(nproc)"` to the `makepkg` command to instruct the compiler to use one worker for each core.
 
 ```
 $ cd linux-turingpi2
-$ MAKEFLAGS="-j$(nproc)" makepkg -si 
+$ MAKEFLAGS="-j$(nproc)" makepkg -si
+$ cp -r /boot/dtbs ../turingpi2-manjaro/dtbs
 $ cd ..
 ```
 
 ### Compiling U-Boot
 
-1. Build each u-boot package, similar to above.
+Build each u-boot from upstream. We're not creating these as `pacman` packages,
+because we're going to flash them via NVIDIA's flashing utilities.
 
 ```
-$ cd uboot-jetson-nano # or uboot-jetson-tx2-nx
-$ MAKEFLAGS="-j$(nproc)" makepkg -si 
 $ cd ..
+$ git clone git@github.com:u-boot/u-boot.git
+$ cd u-boot
+$ git checkout v2023.04 # Or whatever the latest is / version you want to target
 ```
 
-### Compiling Additional Packages
-
-For each additional package directory in this repository
+#### Jetson Nano (P3448 / P3450-0000)
 
 ```
-$ cd <package directory> 
-$ MAKEFLAGS="-j$(nproc)" makepkg -si 
-$ cd ..
+$ make O=build/p3450-0000 p3450-0000_defconfig
+$ make O=build/p3450-0000
+$ cp build/p3450-0000/u-boot.bin ../turingpi2-manjaro/uboot-jetson-nano/u-boot.bin
+```
+
+#### Jetson TX2 NX (P3636-0001)
+
+```
+TBD
 ```
 
 ### Clean up the build dependencies
 ```
 # pacman -Rs base-devel git vim wget ranger xmlto docbook-xsl inetutils bc dtc
 # rm /var/cache/pacman/pkg/*.pkg.tar.xz*
-# rm -rf /home/alarm/gcc* /home/alarm/.cache/ /home/alarm/.bash_history
+# rm -rf /home/manjaro/gcc* /home/manjaro/.cache/ /home/manjaro/.bash_history
 ```
 
 ### Exit the chroot
 
-1. Exit `alarm`
+1. Exit `manjaro`
 
 ```
 $ exit
@@ -301,22 +313,62 @@ We are now ready to package up the root filesystem into a compressed tarball.
 Optionally, we can save the built packages.
 
 ```
- # cd root
- # mv home/alarm/turingpi2-frankenkernel-alarm ../
- # tar cpJf ../turingpi2-frankenkernel-alarm-rootfs.tar.xz .
+ # cd rootfs
+ # mv home/manjaro/turingpi2-manjaro ../
+ # tar cpJf ../turingpi2-manjaro-rootfs.tar.xz .
  # cd ..
 ```
 
 Change ownership of the tarball and exit the `root` account
 
 ```
- # chown <user>:<user> turingpi2-frankenkernel-alarm-rootfs.tar.xz
+ # chown <user>:<user> turingpi2-manjaro-rootfs.tar.xz
  # exit
 ```
 
 **You now have a root filesystem tarball to bootstrap the SD card!**
 
 ## Prepare to Flash
+
+**NOTE**: Much of this is extrapolated from the [Porting to Arch](https://elinux.org/Jetson/Porting_Arch)
+guide for the NVIDIA Jetson TK1 and [Upstream](https://elinux.org/Jetson/Nano/Upstream) guide for the NVIDIA Jetson Nano
+
+1. Grab the latest Linux for Tegra (L4T) release for the given board:
+  * **Jetson Nano**: [L4T 32.7.3](https://developer.nvidia.com/downloads/remetpack-463r32releasev73t210jetson-210linur3273aarch64tbz2)
+  * **Jetson TX2 NX**: [L4T 32.7.3](https://developer.nvidia.com/downloads/remksjetpack-463r32releasev73t186jetsonlinur3273aarch64tbz2)
+
+  and place it within this repo (it will be git ignored)
+
+2. Extract it. You should end up with a `Linux_for_Tegra` directory within the extracted archive, e.g.
+
+```
+$ tar -xf Jetson-210_Linux_R32.7.3_aarch64.tbz2
+$ ls -la Jetson-210_Linux_R32.7.3_aarch64
+```
+
+3. Copy the rootfs tarball into the `L4T_RELEASE/Linux_for_Tegra/rootfs` directory, e.g.
+
+```
+$ cp turingpi2-manjaro-rootfs.tar.xz Jetson-210_Linux_R32.7.3_aarch64/Linux_for_Tegra/rootfs
+```
+
+## Flash the u-boot and DTB for the chip
+
+### Jetson Nano
+
+```
+$ cd Jetson-210_Linux_R32.7.3_aarch64/Linux_for_Tegra
+$ sudo ./flash.sh -k LNX -K ../../uboot-jetson-nano/u-boot.bin jetson-nano-devkit-emmc mmcblk0p1
+$ sudo ./flash.sh -k DTB -d ../../dtbs/tegra210-p3450-0000.dtb jetson-nano-devkit-emmc mmcblk0p1
+```
+
+### Jetson TX2 NX
+
+```
+TBD
+```
+
+## Flash the filesystem to the eMMC for the chip
 
 TBD
 

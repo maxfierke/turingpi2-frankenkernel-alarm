@@ -1,5 +1,8 @@
+*.bin
+*.dtb
 *.tar
 *.tar.*
+*.tbz2
 *.jar
 *.exe
 *.msi
@@ -13,4 +16,5 @@ pkg/
 src/
 
 rootfs*/
-public_sources_*
+Jetson-186_*/
+Jetson-210_*/
