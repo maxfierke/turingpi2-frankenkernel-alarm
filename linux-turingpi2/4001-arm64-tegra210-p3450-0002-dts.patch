@@ -1,0 +1,31 @@
+--- a/arch/arm64/boot/dts/nvidia/tegra210-p3450-0000.dts	2023-06-14 18:29:44.059499118 +0000
++++ b/arch/arm64/boot/dts/nvidia/tegra210-p3450-0000.dts	2023-06-14 18:44:27.959915715 +0000
+@@ -556,7 +556,7 @@
+ 	};
+ 
+ 	mmc@700b0000 {
+-		status = "okay";
++		status = "disabled";
+ 		bus-width = <4>;
+ 
+ 		cd-gpios = <&gpio TEGRA_GPIO(Z, 1) GPIO_ACTIVE_LOW>;
+@@ -579,6 +579,10 @@
+ 		wakeup-source;
+ 	};
+ 
++	mmc@700b0600 {
++		status = "okay";
++	};
++
+ 	usb@700d0000 {
+ 		status = "okay";
+ 		phys = <&micro_b>;
+@@ -1698,7 +1702,7 @@
+ 	};
+ 
+ 	spi@70410000 {
+-		status = "okay";
++		status = "disabled";
+ 
+ 		flash@0 {
+ 			compatible = "jedec,spi-nor";
