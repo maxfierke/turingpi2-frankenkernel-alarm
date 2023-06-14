@@ -15,8 +15,8 @@ This document will walk you through installing [Manjaro ARM](https://archlinuxar
 We will create a root file system for supporting ~~three~~ two different SoCs:
   * ~~**soquartz** (rk3566)~~
     * Use the existing images: https://github.com/manjaro-arm/soquartz-cm4-images/releases
-  * **NVIDIA Jetson TX2 NX** (tegra186)
-  * **NVIDIA Jetson Nano** (tegra210)
+  * **NVIDIA Jetson TX2 NX** (tegra186, p3636-0001)
+  * **NVIDIA Jetson Nano** (tegra210, p3448-0002)
 
 I may expand the supported SoCs if/when I acquire them. (e.g. I suspect I'll get a Turing RK1 at some point)
 
@@ -266,12 +266,13 @@ $ cd u-boot-tegra
 $ git checkout patches-v2022.07 # Or whatever the latest is / version you want to target
 ```
 
-#### Jetson Nano (P3448 / P3450-0000)
+#### Jetson Nano (P3448-0002 / P3450-0002)
 
 ```
-$ make O=build/p3450-0000 p3450-0000_defconfig
-$ make O=build/p3450-0000
-$ cp build/p3450-0000/u-boot.bin ../turingpi2-manjaro/uboot-jetson-nano/u-boot.bin
+$ make O=build/p3450-0002 p3450-0002_defconfig
+$ make O=build/p3450-0002
+$ cp build/p3450-0002/u-boot.bin ../turingpi2-manjaro/uboot-jetson-nano/u-boot.bin
+$ cp build/p3450-0002/u-boot.dtb ../turingpi2-manjaro/uboot-jetson-nano/u-boot.dtb
 ```
 
 #### Jetson TX2 NX (P3636-0001)
@@ -280,6 +281,7 @@ $ cp build/p3450-0000/u-boot.bin ../turingpi2-manjaro/uboot-jetson-nano/u-boot.b
 $ make O=build/p3636-0001 p3636-0001_defconfig
 $ make O=build/p3636-0001
 $ cp build/p3636-0001/u-boot.bin ../turingpi2-manjaro/uboot-jetson-tx2-nx/u-boot.bin
+$ cp build/p3636-0001/u-boot.dtb ../turingpi2-manjaro/uboot-jetson-tx2-nx/u-boot.dtb
 ```
 
 ### Clean up the build dependencies
@@ -360,8 +362,8 @@ $ cp turingpi2-manjaro-rootfs.tar.xz Jetson-210_Linux_R32.7.3_aarch64/Linux_for_
 
 ```
 $ cd Jetson-210_Linux_R32.7.3_aarch64/Linux_for_Tegra
-$ sudo ./flash.sh -k LNX -K ../../uboot-jetson-nano/u-boot.bin jetson-nano-devkit-emmc mmcblk0p1
-$ sudo ./flash.sh -k DTB -d ../../dtbs/tegra210-p3450-0000.dtb jetson-nano-devkit-emmc mmcblk0p1
+$ sudo ./flash.sh -k LNX -K ../../uboot-jetson-nano/u-boot.bin -d ../../uboot-jetson-nano/u-boot.dtb jetson-nano-emmc mmcblk0p1
+$ sudo ./flash.sh -k DTB -d ../../dtbs/tegra210-p3450-0000.dtb jetson-nano-emmc mmcblk0p1
 ```
 
 ### Jetson TX2 NX
