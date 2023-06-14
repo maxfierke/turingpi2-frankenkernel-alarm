@@ -264,6 +264,8 @@ $ cd ..
 $ git clone git@github.com:u-boot/u-boot.git
 $ cd u-boot
 $ git checkout v2023.04 # Or whatever the latest is / version you want to target
+$ wget https://github.com/OE4T/u-boot-tegra/commit/d3f0ae670f9a665d777704a479808c118dc8869c.patch -O 0001-arm-dts-add-SPI-flash-node-to-for-Jetson-Nano-devices.patch
+$ git am 0001-arm-dts-add-SPI-flash-node-to-for-Jetson-Nano-devices.patch # Applies patch for SPI to enable "saveenv" in u-boot
 ```
 
 #### Jetson Nano (P3448 / P3450-0000)
