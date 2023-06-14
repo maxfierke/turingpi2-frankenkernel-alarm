@@ -74,7 +74,7 @@ Find the latest here: https://github.com/manjaro-arm/rootfs/releases
 e.g.
 
 ```
-$ wget https://github.com/manjaro-arm/rootfs/releases/download/20230605/Manjaro-ARM-aarch64-latest.tar.gz
+$ wget https://github.com/manjaro-arm/rootfs/releases/download/20230612/Manjaro-ARM-aarch64-latest.tar.gz
 ```
 
 4. Create the mount point and extract the files as root (not via sudo)
