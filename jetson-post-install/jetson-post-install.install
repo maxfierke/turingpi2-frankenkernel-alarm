@@ -1,0 +1,21 @@
+post_install() {
+    # Edit mkinitcpio.conf
+    echo "Editing mkinitcpio.conf..."
+    sed -i s/"^MODULES=()"/"MODULES=(rtc_tegra tegra_wdt tegra_drm)"/g /etc/mkinitcpio.conf
+    
+    # Edit extlinux.conf
+    echo "Editing extlinux.conf..."
+    sed -i s!"bootsplash.bootfile=bootsplash-themes/manjaro/bootsplash"!"quiet splash plymouth.ignore-serial-consoles"!g /boot/extlinux/extlinux.conf
+}
+
+post_upgrade() {
+    # Provide instructions
+    if ! grep -q '^MODULES=(.*rtc_tegra' /etc/mkinitcpio.conf; then
+        echo "To prevent journal corruption on boot, please add 'rtc_tegra' to the start"
+        echo "of the 'MODULES' list in /etc/mkinitcpio.conf and rebuild the initcpio images."
+        echo "You can do this by running:"
+        echo "# sed -i 's/^MODULES=(/MODULES=(rtc_tegra /g' /etc/mkinitcpio.conf"
+        echo "# mkinitcpio -P"
+    fi
+}
+

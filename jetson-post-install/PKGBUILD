@@ -1,0 +1,16 @@
+# Maintainer: Max Fierke <max@maxfierke.com>
+
+pkgname=jetson-post-install
+pkgver=20$(date +%y%m%d)
+pkgrel=1
+pkgdesc="NVIDIA Jetson post install files"
+arch=('any')
+url="https://github.com/maxfierke/turingpi2-manjaro"
+license=('GPL')
+install=${pkgname}.install
+source=()
+sha256sums=()
+
+package() {
+    echo "Modifying NVIDIA Jetson-specific files..."
+}
