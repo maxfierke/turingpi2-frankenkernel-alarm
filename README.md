@@ -284,8 +284,20 @@ $ cp build/p3636-0001/u-boot.bin ../turingpi2-manjaro/uboot-jetson-tx2-nx/u-boot
 $ cp build/p3636-0001/u-boot.dtb ../turingpi2-manjaro/uboot-jetson-tx2-nx/u-boot.dtb
 ```
 
-### Clean up the build dependencies
+### Compiling post-install package
+
 ```
+$ cd linux-turingpi2
+$ cd jetson-post-install
+$ makepkg -si
+$ cd ..
+```
+
+### Clean up the build dependencies
+
+
+```
+$ exit # Exit manjaro user and return to root
 # pacman -Rs base-devel git vim wget ranger xmlto docbook-xsl inetutils bc dtc
 # rm /var/cache/pacman/pkg/*.pkg.tar.xz*
 # rm -rf /home/manjaro/gcc* /home/manjaro/.cache/ /home/manjaro/.bash_history
