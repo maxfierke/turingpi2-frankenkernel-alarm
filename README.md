@@ -33,7 +33,7 @@ Pre-built root filesystem(s) are provided in the **Releases** tab. Skip to the
 
 * Root password: `root`
 * Timezone: `US/Central`
-* Locale: `en_US UTF8`
+* Locale: `en_US.UTF-8`
 * Hostname: `turingpi2-node0x`
 
 # Setup
@@ -44,7 +44,7 @@ distribution.
 In order to build the root filesystem, we will set up the following:
 
 1. `aarch64` chroot environment + necessary configuration
-2. `arm-none-eabi-gcc` build tools from ARM
+2. (optional) `arm-none-eabi-gcc` build tools from ARM
 3. Linux kernel
 4. U-Boot bootloader
 5. Additional packages for running on Turing Pi 2
@@ -57,8 +57,8 @@ We will start by creating an ARM chroot environment to build our root filesystem
 1. Install the required packages
 
 ```
-$ yay -S base-devel qemu-user-static qemu-user-binfmt arch-install-scripts
-# systemctl restart systemd-binfmt.service
+$ sudo pacman -S base-devel qemu-user-static qemu-user-binfmt arch-install-scripts
+$ sudo systemctl restart systemd-binfmt.service
 ```
 
 2. Verify that an `aarch64` executable exists in
@@ -74,7 +74,7 @@ Find the latest here: https://github.com/manjaro-arm/rootfs/releases
 e.g.
 
 ```
-$ wget https://github.com/manjaro-arm/rootfs/releases/download/20230612/Manjaro-ARM-aarch64-latest.tar.gz
+$ wget https://github.com/manjaro-arm/rootfs/releases/latest/download/Manjaro-ARM-aarch64-latest.tar.gz
 ```
 
 4. Create the mount point and extract the files as root (not via sudo)
@@ -85,6 +85,10 @@ $ sudo su
 
 # bsdtar -xpf Manjaro-ARM-aarch64-latest.tar.gz -C rootfs
 # mount --bind rootfs rootfs
+# touch rootfs/MANJARO-ARM-IMAGE-BUILD
+# mkdir -p rootfs/etc
+# ln -sf ../usr/lib/os-release rootfs/etc/os-release
+
 ```
 
 **NOTE**: It's very important that this `rootfs` folder is owned by **root**. Otherwise, you will
@@ -95,6 +99,14 @@ errors in the final build.
 
 ```
 # arch-chroot rootfs
+```
+
+6. Seed the keys
+
+```
+# pacman-key --init
+# pacman-key --populate archlinuxarm manjaro manjaro-arm
+# pacman-mirrors -f10
 ```
 
 6. Finally, update the packages
@@ -109,22 +121,52 @@ We will start with lightly configuring our system before compiling the packages.
 
 For this section, **all commands will be run inside the chroot**.
 
-**TODO**: This is all wrong, need to update for creating a "minimal" image from
-the Manjaro rootfs.
+This is largely cribbed from [manjaro-arm-installer](https://gitlab.manjaro.org/manjaro-arm/applications/manjaro-arm-installer)
+
+0. Grab the latest `arm-profiles` from Manjaro ARM
+
+```
+# pacman -S manjaro-arm-tools
+# getarmprofiles
+```
 
 1. Install the packages needed for a minimal base
 
 ```
-# pacman -S base-devel git vim wget ranger sudo man networkmanager
+# PKG_SHARED=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/editions/shared | awk '{print $1}')
+# PKG_EDITION=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/editions/minimal | awk '{print $1}')
+# pacman -S manjaro-system manjaro-release systemd systemd-libs base-devel git vim wget ranger sudo man $PKG_SHARED $PKG_EDITION
 ```
 
-2. Enable `networkmanager` and `dhcpcd` for networking on first boot
+3. Enable (and disable) services
 
 ```
-# systemctl enable NetworkManager dhcpcd
+# EDITION_SERVICES=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/services/minimal | awk '{print $1}')
+# systemctl enable getty.target haveged.service $EDITION_SERVICES
+# sed -i s/"enable systemd-resolved.service"/"#enable systemd-resolved.service"/ /usr/lib/systemd/system-preset/90-systemd.preset
 ```
 
-3. Set the Locale by editing `/etc/locale.gen` and uncommenting your required locales.
+4. Setup a bunch of system config
+
+```
+# chmod u+s /usr/bin/ping
+```
+
+4. Set the Locale by editing `/etc/locale.gen` and uncommenting your required locales.
+
+5. Set your default language by editing `/etc/locale.conf`
+
+```
+# echo "LANG=en_US.UTF-8" | tee --append /etc/locale.conf
+```
+
+5. Set your keymap and font by editing `/etc/vconsole.conf`
+
+```
+KEYMAP=us
+FONT=Lat2-Terminus16
+```
+
 4. Run
 
 ```
@@ -167,32 +209,24 @@ your host system timezone after finishing the root tarball.
 # passwd
 ```
 
-### Switch to the `manjaro` user
+### Create and switch to a non-root user
 
-**TODO**: This is all wrong, need to update for creating a "minimal" image from
-the Manjaro rootfs.
+**NOTE**: The default user and password are setup here as **manjaro**, but you can use whatever you want below,
+just substitute anything you want in for `manjaro`.
 
-1. We can avoid working with the root account by granting `manjaro`, the default Arch Linux ARM user, `sudo` privileges.
-
-```
-# EDITOR=/usr/bin/vim visudo
-```
-
-2. And add the corresponding line for `manjaro` after the one for `root`
+1. We can avoid working with the root account by creating and granting our own user (e.g. `manjaro`) `sudo` privileges.
 
 ```
-manjaro ALL=(ALL) ALL
+# useradd -m -G wheel,sys,audio,input,video,storage,lp,network,users,power -s /bin/bash manjaro
+# passwd manjaro
 ```
 
-3. Switch to the `manjaro` user
+2. Switch to the `manjaro` user
 
 ```
 # su manjaro
-
 $ cd
 ```
-
-**NOTE**: The default password for the **manjaro** user is **manjaro**
 
 ## Acquiring GCC Build Tools
 
@@ -298,8 +332,10 @@ $ cd ..
 
 ```
 $ exit # Exit manjaro user and return to root
-# pacman -Rs base-devel git vim wget ranger xmlto docbook-xsl inetutils bc dtc
-# rm /var/cache/pacman/pkg/*.pkg.tar.xz*
+# pacman -Rs base-devel git vim wget ranger xmlto docbook-xsl inetutils bc dtc manjaro-arm-tools
+# rm -f /var/cache/pacman/pkg/*.pkg.tar.xz*
+# rm -f MANJARO-ARM-IMAGE-BUILD
+# rm -f /var/log/* /var/log/journal/* /etc/*.pacnew /usr/lib/systemd/system/systemd-firstboot.service /etc/machine-id
 # rm -rf /home/manjaro/gcc* /home/manjaro/.cache/ /home/manjaro/.bash_history
 ```
 
