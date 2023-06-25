@@ -417,7 +417,9 @@ $ sudo ./flash.sh -k DTB -d ../../dtbs/tegra210-p3450-0000.dtb jetson-nano-emmc 
 ### Jetson TX2 NX
 
 ```
-TBD
+$ cd Jetson-186_Linux_R32.7.3_aarch64/Linux_for_Tegra
+$ sudo ./flash.sh -k LNXNAME -K ../../uboot-jetson-tx2-nx/u-boot.bin -d ../../uboot-jetson-tx2-nx/u-boot.dtb jetson-xavier-nx-devkit-tx2-nx mmcblk0p1
+$ sudo ./flash.sh -k KERNELDTB-NAME -d ../../dtbs/tegra186-p3636-0001.dtb jetson-xavier-nx-devkit-tx2-nx mmcblk0p1
 ```
 
 ## Flash the filesystem to the eMMC for the chip
