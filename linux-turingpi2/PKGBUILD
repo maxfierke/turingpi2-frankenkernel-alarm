@@ -6,7 +6,7 @@
 
 pkgbase=linux-turingpi2
 pkgver=6.3.9
-pkgrel=1
+pkgrel=2
 _newversion=false
 _stopbuild=false     # Will also stop if ${_newversion} is true
 _srcname="linux-${pkgver/%.0/}"
@@ -25,7 +25,7 @@ source=("http://www.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.xz"
         '90-linux.hook')
 md5sums=('d4e45bcf3f0df8077d37eaa76e7cf307'
          '4ac8ce43bf197f28af3ccbb3dea99b7e'
-         '4bdf796c094a65bacf69d7066aef2123'
+         '556e5da10358595f18b395ae5b8221f2'
          '86d4a35722b5410e3b29fc92dae15d4b'
          'ce6c81ad1ad1f8b333fd6077d47abdaf'
          '3dc88030a8f2f5a5f97266d99b149f77')
