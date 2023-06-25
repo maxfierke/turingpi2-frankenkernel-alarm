@@ -133,15 +133,15 @@ This is largely cribbed from [manjaro-arm-installer](https://gitlab.manjaro.org/
 1. Install the packages needed for a minimal base
 
 ```
-# PKG_SHARED=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/editions/shared | awk '{print $1}')
-# PKG_EDITION=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/editions/minimal | awk '{print $1}')
-# pacman -S manjaro-system manjaro-release systemd systemd-libs base-devel git vim wget ranger sudo man $PKG_SHARED $PKG_EDITION
+# PKG_SHARED=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/arm-profiles/editions/shared | awk '{print $1}')
+# PKG_EDITION=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/arm-profiles/editions/minimal | awk '{print $1}')
+# pacman -S manjaro-system manjaro-release systemd systemd-libs base-devel git vim wget ranger sudo man iputils linux-firmware $PKG_SHARED $PKG_EDITION
 ```
 
 3. Enable (and disable) services
 
 ```
-# EDITION_SERVICES=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/services/minimal | awk '{print $1}')
+# EDITION_SERVICES=$(grep "^[^#;]" /usr/share/manjaro-arm-tools/profiles/arm-profiles/services/minimal | grep -v "bootsplash" | awk '{print $1}')
 # systemctl enable getty.target haveged.service $EDITION_SERVICES
 # sed -i s/"enable systemd-resolved.service"/"#enable systemd-resolved.service"/ /usr/lib/systemd/system-preset/90-systemd.preset
 ```
@@ -411,15 +411,15 @@ $ cp turingpi2-manjaro-rootfs.tar.xz Jetson-210_Linux_R32.7.3_aarch64/Linux_for_
 ```
 $ cd Jetson-210_Linux_R32.7.3_aarch64/Linux_for_Tegra
 $ sudo ./flash.sh -k LNX -K ../../uboot-jetson-nano/u-boot.bin -d ../../uboot-jetson-nano/u-boot.dtb jetson-nano-emmc mmcblk0p1
-$ sudo ./flash.sh -k DTB -d ../../dtbs/tegra210-p3450-0000.dtb jetson-nano-emmc mmcblk0p1
+$ sudo ./flash.sh -k DTB -d ../../rootfs/boot/dtbs/nvidia/tegra210-p3450-0000.dtb jetson-nano-emmc mmcblk0p1
 ```
 
 ### Jetson TX2 NX
 
 ```
 $ cd Jetson-186_Linux_R32.7.3_aarch64/Linux_for_Tegra
-$ sudo ./flash.sh -k LNXNAME -K ../../uboot-jetson-tx2-nx/u-boot.bin -d ../../uboot-jetson-tx2-nx/u-boot.dtb jetson-xavier-nx-devkit-tx2-nx mmcblk0p1
-$ sudo ./flash.sh -k KERNELDTB-NAME -d ../../dtbs/tegra186-p3636-0001.dtb jetson-xavier-nx-devkit-tx2-nx mmcblk0p1
+$ sudo ./flash.sh -k kernel -K ../../uboot-jetson-tx2-nx/u-boot.bin -d ../../uboot-jetson-tx2-nx/u-boot.dtb jetson-xavier-nx-devkit-tx2-nx mmcblk0p1
+$ sudo ./flash.sh -k kernel-dtb -d ../../rootfs/boot/dtbs/nvidia/tegra186-p3509-0000+p3636-0001.dtb jetson-xavier-nx-devkit-tx2-nx mmcblk0p1
 ```
 
 ## Flash the filesystem to the eMMC for the chip
